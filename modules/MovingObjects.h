@@ -7,7 +7,6 @@ using namespace std;
 class Position {
     private:
         int x, y;
-
     public:
         Position()
         {
