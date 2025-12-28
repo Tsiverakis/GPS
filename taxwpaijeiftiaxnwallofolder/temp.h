@@ -36,6 +36,10 @@ public:
 
     // destructor
     virtual ~WorldObject() = 0;
+    std::string getType();
+    Position getPosition();
+    std::string getID();
+    std::string getglyph();
 };
 
 #endif

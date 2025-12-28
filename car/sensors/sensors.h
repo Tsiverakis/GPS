@@ -8,7 +8,7 @@ struct ReadData{
     std::string type;
     int distance;
     Position p;
-    std::string objectid;
+    std::string objectid;//category of object
     double confidence;
     int speed;
     std::string direction;

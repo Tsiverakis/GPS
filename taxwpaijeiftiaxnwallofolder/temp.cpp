@@ -37,12 +37,35 @@ int Position::getY() const
     return this->y;
 }
 
-//WORLD OBJECT
-// constructor
+// WORLD OBJECT
+//  constructor
 WorldObject::WorldObject(string type, string ID, string glyph, int x, int y)
 {
     this->glyph = glyph;
     this->ID = ID;
     this->type = type;
     p = Position(x, y);
+}
+WorldObject::~WorldObject()
+{
+}
+
+string WorldObject::getType()
+{
+    return type;
+}
+
+Position WorldObject::getPosition()
+{
+    return p;
+}
+
+string WorldObject::getID()
+{
+    return ID;
+}
+
+string WorldObject::getglyph()
+{
+    return glyph;
 }

@@ -9,7 +9,7 @@ class StationaryVehicle : WorldObject
 public:
     // constructor
     StationaryVehicle(int x, int y, string ID, string glyph)
-        : WorldObject(ID, glyph, x, y)
+        : WorldObject(type, ID, glyph, x, y)
     {
         cout << "Stationary vehicle created at: " << p.getX() << "," << p.getY() << endl;
     }
@@ -25,23 +25,23 @@ public:
 class TrafficSign : WorldObject
 {
 private:
-    string signID; // type of sign
+    string signtext; // type of sign
 public:
     // constructor
     TrafficSign(int x, int y, string signID, string ID, string glyph)
-    : WorldObject(ID,glyph,x,y)
+    : WorldObject(type, ID,glyph,x,y)
     {
-        this->signID = signID;
-        cout << "Sign " << get_ID() << " created at: " << p.getX() << "," << p.getY() << endl;
+        this->signtext = signID;
+        cout << "Sign " << get_text() << " created at: " << p.getX() << "," << p.getY() << endl;
     }
 
     // destructor
     ~TrafficSign()
     {
-        cout << "Sign " << get_ID() << " destroyed at: " << p.getX() << "," << p.getY() << endl;
+        cout << "Sign " << get_text() << " destroyed at: " << p.getX() << "," << p.getY() << endl;
     }
 
-    string get_ID() { return signID; } // returns the type of the sign
+    string get_text() { return signtext; } // returns the type of the sign
 };
 
 // It is a traffic light with a color(state) and a Position x,y
@@ -53,7 +53,7 @@ private:
 public:
     // constructor
     TrafficLight(int x, int y, string state, string ID, string glyph)
-    :WorldObject(ID,glyph,x,y)
+    :WorldObject(type, ID,glyph,x,y)
     {
         this->state = state;
         cout << "Traffic light " << get_State() << " created at: " << p.getX() << "," << p.getY() << endl;
