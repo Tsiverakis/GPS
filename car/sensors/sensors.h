@@ -4,19 +4,6 @@
 #include <vector>
 #include "temp.h"
 
-struct ReadData{
-    std::string type;
-    int distance;
-    Position p;
-    std::string objectid;//category of object
-    double confidence;
-    int speed;
-    std::string direction;
-    std:: string signtext;
-    std::string trafficlightp;
-
-};
-
 class Sensor
 {
 protected:
@@ -26,7 +13,7 @@ public:
     // constructor
     Sensor(int range);
 
-    virtual std::vector<ReadData> sensorreading() = 0;
+    virtual std::vector<ReadData> sensorreading(Position p, std::string direction, std::vector<vector<WorldObject *>>& world) = 0;
 };
 
 class Lidar : public Sensor
@@ -35,7 +22,7 @@ public:
     //constructor
     Lidar();
 
-    std::vector<ReadData> sensorreading(Position p);
+    std::vector<ReadData> sensorreading(Position p, std::string direction, std::vector<vector<WorldObject *>>& world);
 
 };
 
@@ -44,7 +31,7 @@ class Radar : public Sensor{
 
     Radar();
 
-    std::vector<ReadData> sensorreading(Position p, std::string direction);
+    std::vector<ReadData> sensorreading(Position p, std::string direction, std::vector<vector<WorldObject *>>& world);
 
 };
 
@@ -53,7 +40,7 @@ class Camera : public Sensor{
 
     Camera();
 
-    std::vector<ReadData> sensorreading(Position p,std::string direction);
+    std::vector<ReadData> sensorreading(Position p,std::string direction, std::vector<vector<WorldObject *>>& world);
 
 };
 

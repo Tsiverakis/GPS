@@ -9,7 +9,6 @@ using namespace std;
 
 // dummy values
 int max_value = 15; // size of the world
-vector<vector<WorldObject *>> world;
 
 // SENSOR
 Sensor::Sensor(int range)
@@ -21,7 +20,7 @@ Sensor::Sensor(int range)
 // LIDAR
 Lidar::Lidar() : Sensor(9) {}
 
-vector<ReadData> Lidar::sensorreading(Position p)
+vector<ReadData> Lidar::sensorreading(Position p, string direction, vector<vector<WorldObject *>> &world)
 {
     vector<ReadData> temp;
     int border1, border2, border3, border4;
@@ -65,15 +64,22 @@ vector<ReadData> Lidar::sensorreading(Position p)
     {
         for (int j = border3; j <= border4; j++)
         {
-            if (world[i][j] != nullptr)
+            if (world[j][i] != nullptr)
             {
-                if (world[i][j]->getType() == "MovingObject" || world[i][j]->getType() == "StaticObject")
+                if (world[j][i]->getType() == "MovingObject" || world[j][i]->getType() == "StaticObject")
                 {
                     ReadData temp1;
-                    temp1.distance = abs(p.getX() - j) + abs(p.getY() - world[i][j]->getPosition().getY());
-                    temp1.objectid = world[i][j]->getID();
+                    temp1.distance = abs(p.getX() - j) + abs(p.getY() - world[j][i]->getPosition().getY());
+                    temp1.objectid = world[j][i]->getID();
                     double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                     temp1.confidence = 0.99 * (1.0 - ((double)temp1.distance / range)) + noise;
+                    temp1.type = world[j][i]->getType();
+                    temp1.p = world[j][i]->getPosition();
+                    temp1.speed = -1;
+                    temp1.direction = "N/A";
+                    temp1.trafficlightp = "N/A";
+                    temp1.signtext = "N/A";
+
                     temp.emplace_back(temp1);
                 }
             }
@@ -85,7 +91,7 @@ vector<ReadData> Lidar::sensorreading(Position p)
 // RADAR
 Radar::Radar() : Sensor(12) {};
 
-vector<ReadData> Radar::sensorreading(Position p, string direction)
+vector<ReadData> Radar::sensorreading(Position p, string direction, vector<vector<WorldObject *>> &world)
 {
     vector<ReadData> temp;
     int border2;
@@ -117,6 +123,11 @@ vector<ReadData> Radar::sensorreading(Position p, string direction)
                         }
                         double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                         temp1.confidence = 0.95 * (1.0 - ((double)temp1.distance / range)) + noise;
+                        temp1.objectid = world[p.getX()][i]->getID();
+                        temp1.signtext = "N/A";
+                        temp1.type = world[p.getX()][i]->getType();
+                        temp1.trafficlightp = "N/A";
+                        temp1.p = world[p.getX()][i]->getPosition();
                         temp.emplace_back(temp1);
                     }
                 }
@@ -152,6 +163,11 @@ vector<ReadData> Radar::sensorreading(Position p, string direction)
                         }
                         double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                         temp1.confidence = 0.95 * (1.0 - ((double)temp1.distance / range)) + noise;
+                        temp1.objectid = world[p.getX()][i]->getID();
+                        temp1.signtext = "N/A";
+                        temp1.type = world[p.getX()][i]->getType();
+                        temp1.trafficlightp = "N/A";
+                        temp1.p = world[p.getX()][i]->getPosition();
                         temp.emplace_back(temp1);
                     }
                 }
@@ -186,6 +202,11 @@ vector<ReadData> Radar::sensorreading(Position p, string direction)
                         }
                         double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                         temp1.confidence = 0.95 * (1.0 - ((double)temp1.distance / range)) + noise;
+                        temp1.objectid = world[i][p.getY()]->getID();
+                        temp1.signtext = "N/A";
+                        temp1.type = world[i][p.getY()]->getType();
+                        temp1.trafficlightp = "N/A";
+                        temp1.p = world[i][p.getY()]->getPosition();
                         temp.emplace_back(temp1);
                     }
                 }
@@ -220,6 +241,11 @@ vector<ReadData> Radar::sensorreading(Position p, string direction)
                         }
                         double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                         temp1.confidence = 0.95 * (1.0 - ((double)temp1.distance / range)) + noise;
+                        temp1.objectid = world[i][p.getY()]->getID();
+                        temp1.signtext = "N/A";
+                        temp1.type = world[i][p.getY()]->getType();
+                        temp1.trafficlightp = "N/A";
+                        temp1.p = world[i][p.getY()]->getPosition();
                         temp.emplace_back(temp1);
                     }
                 }
@@ -232,7 +258,7 @@ vector<ReadData> Radar::sensorreading(Position p, string direction)
 
 Camera::Camera() : Sensor(7) {};
 
-vector<ReadData> Camera::sensorreading(Position p, string direction)
+vector<ReadData> Camera::sensorreading(Position p, string direction, vector<vector<WorldObject *>> &world)
 {
     vector<ReadData> temp;
     int border1, border2, border3, border4;
@@ -273,47 +299,55 @@ vector<ReadData> Camera::sensorreading(Position p, string direction)
                 for (int j = border3; j <= border4; j++)
                 {
                     ReadData temp1;
-                    if (world[i][j] != nullptr)
+                    if (world[j][i] != nullptr)
                     {
-                        if (world[i][j]->getType() == "StaticObject")
+                        if (world[j][i]->getType() == "StaticObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            if (world[i][j]->getType() == "TrafficSign")
+                            if (world[j][i]->getType() == "TrafficSign")
                             {
-                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[i][j]);
+                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[j][i]);
                                 if (sign != nullptr)
                                 {
                                     temp1.signtext = sign->get_text();
+                                    temp1.trafficlightp = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
-                            else if (world[i][j]->getType() == "TrafficLight")
+                            else if (world[j][i]->getType() == "TrafficLight")
                             {
-                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[i][j]);
+                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[j][i]);
                                 if (light != nullptr)
                                 {
                                     temp1.trafficlightp = light->get_State();
+                                    temp1.signtext = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
                             temp.emplace_back(temp1);
                         }
-                        else if (world[i][j]->getType() == "MovingObject")
+                        else if (world[j][i]->getType() == "MovingObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[i][j]);
+                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[j][i]);
                             if (vehicle != nullptr)
                             {
                                 temp1.speed = vehicle->getSpeed();
                                 temp1.direction = vehicle->getDirection();
+                                temp1.signtext = "N/A";
+                                temp1.trafficlightp = "N/A";
                             }
                             temp.emplace_back(temp1);
                         }
@@ -357,47 +391,55 @@ vector<ReadData> Camera::sensorreading(Position p, string direction)
                 for (int j = border3; j <= border4; j++)
                 {
                     ReadData temp1;
-                    if (world[i][j] != nullptr)
+                    if (world[j][i] != nullptr)
                     {
-                        if (world[i][j]->getType() == "StaticObject")
+                        if (world[j][i]->getType() == "StaticObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            if (world[i][j]->getType() == "TrafficSign")
+                            if (world[j][i]->getType() == "TrafficSign")
                             {
-                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[i][j]);
+                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[j][i]);
                                 if (sign != nullptr)
                                 {
                                     temp1.signtext = sign->get_text();
+                                    temp1.trafficlightp = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
-                            else if (world[i][j]->getType() == "TrafficLight")
+                            else if (world[j][i]->getType() == "TrafficLight")
                             {
-                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[i][j]);
+                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[j][i]);
                                 if (light != nullptr)
                                 {
                                     temp1.trafficlightp = light->get_State();
+                                    temp1.signtext = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
                             temp.emplace_back(temp1);
                         }
-                        else if (world[i][j]->getType() == "MovingObject")
+                        else if (world[j][i]->getType() == "MovingObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[i][j]);
+                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[j][i]);
                             if (vehicle != nullptr)
                             {
                                 temp1.speed = vehicle->getSpeed();
                                 temp1.direction = vehicle->getDirection();
+                                temp1.signtext = "N/A";
+                                temp1.trafficlightp = "N/A";
                             }
                             temp.emplace_back(temp1);
                         }
@@ -442,47 +484,55 @@ vector<ReadData> Camera::sensorreading(Position p, string direction)
                 for (int j = border3; j <= border4; j++)
                 {
                     ReadData temp1;
-                    if (world[i][j] != nullptr)
+                    if (world[j][i] != nullptr)
                     {
-                        if (world[i][j]->getType() == "StaticObject")
+                        if (world[j][i]->getType() == "StaticObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            if (world[i][j]->getType() == "TrafficSign")
+                            if (world[j][i]->getType() == "TrafficSign")
                             {
-                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[i][j]);
+                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[j][i]);
                                 if (sign != nullptr)
                                 {
                                     temp1.signtext = sign->get_text();
+                                    temp1.trafficlightp = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
-                            else if (world[i][j]->getType() == "TrafficLight")
+                            else if (world[j][i]->getType() == "TrafficLight")
                             {
-                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[i][j]);
+                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[j][i]);
                                 if (light != nullptr)
                                 {
                                     temp1.trafficlightp = light->get_State();
+                                    temp1.signtext = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
                             temp.emplace_back(temp1);
                         }
-                        else if (world[i][j]->getType() == "MovingObject")
+                        else if (world[j][i]->getType() == "MovingObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[i][j]);
+                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[j][i]);
                             if (vehicle != nullptr)
                             {
                                 temp1.speed = vehicle->getSpeed();
                                 temp1.direction = vehicle->getDirection();
+                                temp1.signtext = "N/A";
+                                temp1.trafficlightp = "N/A";
                             }
                             temp.emplace_back(temp1);
                         }
@@ -526,47 +576,55 @@ vector<ReadData> Camera::sensorreading(Position p, string direction)
                 for (int j = border3; j < border4; j++)
                 {
                     ReadData temp1;
-                    if (world[i][j] != nullptr)
+                    if (world[j][i] != nullptr)
                     {
-                        if (world[i][j]->getType() == "StaticObject")
+                        if (world[j][i]->getType() == "StaticObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            if (world[i][j]->getType() == "TrafficSign")
+                            if (world[j][i]->getType() == "TrafficSign")
                             {
-                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[i][j]);
+                                TrafficSign *sign = dynamic_cast<TrafficSign *>(world[j][i]);
                                 if (sign != nullptr)
                                 {
                                     temp1.signtext = sign->get_text();
+                                    temp1.trafficlightp = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
-                            else if (world[i][j]->getType() == "TrafficLight")
+                            else if (world[j][i]->getType() == "TrafficLight")
                             {
-                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[i][j]);
+                                TrafficLight *light = dynamic_cast<TrafficLight *>(world[j][i]);
                                 if (light != nullptr)
                                 {
                                     temp1.trafficlightp = light->get_State();
+                                    temp1.signtext = "N/A";
+                                    temp1.speed = -1;
+                                    temp1.direction = "N/A";
                                 }
                             }
                             temp.emplace_back(temp1);
                         }
-                        else if (world[i][j]->getType() == "MovingObject")
+                        else if (world[j][i]->getType() == "MovingObject")
                         {
-                            temp1.type = world[i][j]->getType();
-                            temp1.objectid = world[i][j]->getID();
-                            temp1.distance = abs(world[i][j]->getPosition().getX() - p.getX()) + abs(world[i][j]->getPosition().getY() - p.getY());
-                            temp1.p = world[i][j]->getPosition();
+                            temp1.type = world[j][i]->getType();
+                            temp1.objectid = world[j][i]->getID();
+                            temp1.distance = abs(world[j][i]->getPosition().getX() - p.getX()) + abs(world[j][i]->getPosition().getY() - p.getY());
+                            temp1.p = world[j][i]->getPosition();
                             double noise = (rand() % 2 == 0) ? -0.05 : 0.05;
                             temp1.confidence = 0.87 * (1.0 - ((double)temp1.distance / range)) + noise;
-                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[i][j]);
+                            MovingVehicle *vehicle = dynamic_cast<MovingVehicle *>(world[j][i]);
                             if (vehicle != nullptr)
                             {
                                 temp1.speed = vehicle->getSpeed();
                                 temp1.direction = vehicle->getDirection();
+                                temp1.signtext = "N/A";
+                                temp1.trafficlightp = "N/A";
                             }
                             temp.emplace_back(temp1);
                         }

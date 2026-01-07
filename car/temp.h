@@ -2,6 +2,9 @@
 #define TEMP
 
 #include <string>
+#include <vector>
+
+int max_value = 15;
 // holds a 2d possition x,y
 class Position
 {
@@ -42,4 +45,16 @@ public:
     std::string getglyph();
 };
 
+struct ReadData
+{
+    std::string type;
+    int distance;
+    Position p;
+    std::string objectid; // category of object
+    double confidence;
+    int speed;
+    std::string direction;
+    std::string signtext;
+    std::string trafficlightp;
+};
 #endif
