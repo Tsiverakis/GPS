@@ -208,6 +208,7 @@ void SelfDrivingCar::makeDecision(vector<ReadData> data)
 
 void SelfDrivingCar::executeMovement()
 {
+
     if (Direction == "UP")
     {
         p.setY(p.getY() + speed);

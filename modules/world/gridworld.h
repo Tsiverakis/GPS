@@ -30,7 +30,6 @@ public:
     void visualization_full() const;
     void visualization_pov(SelfDrivingCar* ego, int radius, std::string mode) const;
     
-    // Προσθήκη βοηθητικής συνάρτησης για έλεγχο ορίων
     bool isWithinBounds(int x, int y) const {
         return (x >= 0 && x < size && y >= 0 && y < size);
     }

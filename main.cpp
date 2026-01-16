@@ -13,7 +13,7 @@
 
 using namespace std;
 
-// Δήλωση της global μεταβλητής για τα όρια
+
 double minConfidenceThreshold = 0.40;
 int max_value = 40;
 
@@ -126,8 +126,8 @@ int main(int argc, char *argv[])
         world.addObject(new TrafficSign(rand() % dimX, rand() % dimY, "STOP", "SS" + to_string(i), "S"));
 
     cout << "[SYSTEM] Min Confidence Threshold: " << minConfidenceThreshold << endl;
-
-    // ΠΛΗΡΗΣ ΟΠΤΙΚΟΠΟΙΗΣΗ ΣΤΗΝ ΑΡΧΗ
+\
+    //Full visualization
     world.visualization_full();
 
     int *count_for_trafficlight_ticks = 0;
@@ -140,8 +140,6 @@ int main(int argc, char *argv[])
         vector<ReadData> detections = egoCar->collectSensorData(world.getGrid());
         egoCar->makeDecision(detections);
 
-        // if (egoCar->executeMovement())
-        //     break; // Αν φτάσει στον στόχο επιστρέφει true
         egoCar->makeDecision(detections);
         egoCar->executeMovement();
 
@@ -157,11 +155,9 @@ int main(int argc, char *argv[])
             break;
         }
 
-        // ΜΕΡΙΚΗ ΟΠΤΙΚΟΠΟΙΗΣΗ ΣΕ ΚΑΘΕ ΒΗΜΑ
         world.visualization_pov(egoCar, 4, "centered");
     }
 
-    // ΠΛΗΡΗΣ ΟΠΤΙΚΟΠΟΙΗΣΗ ΣΤΟ ΤΕΛΟΣ
     world.visualization_full();
 
     cout << "Simulation finished." << endl;

@@ -109,35 +109,26 @@ void GridWorld::update(int *count)
             *count = 0;
         }
 
-        // Position oldPos = obj->getPosition();
 
-        // if (obj->getType() == "MovingObject")
-        // {
-        //     MovingVehicle *mv = dynamic_cast<MovingVehicle *>(obj);
-        //     if (mv)
-        //     {
-        //         grid[oldPos.getX()][oldPos.getY()] = nullptr;
-        //         mv->move();
-        //         Position newPos = mv->getPosition();
-        //         if (newPos.getX() >= 0 && newPos.getX() < size && newPos.getY() >= 0 && newPos.getY() < size)
-        //         {
-        //             grid[newPos.getX()][newPos.getY()] = mv;
-        //         }
-        //         else
-        //         {
-        //             delete mv;
-        //         }
-        //     }
-        // }
-        // else if (obj->getType() == "SelfDrivingCar")
-        // {
-        //     grid[oldPos.getX()][oldPos.getY()] = nullptr;
-        //     Position newPos = obj->getPosition();
-        //     if (newPos.getX() >= 0 && newPos.getX() < size && newPos.getY() >= 0 && newPos.getY() < size)
-        //     {
-        //         grid[newPos.getX()][newPos.getY()] = obj;
-        //     }
-        // }
+        for (MovingVehicle *obj : objectsToMove)
+        {
+            if (obj->getDirection() == "UP")
+            {
+                obj->getPosition().setY(obj->getPosition().getY() + 1);
+            }
+            else if (obj->getDirection() == "DOWN")
+            {
+                obj->getPosition().setY(obj->getPosition().getY() - 1);
+            }
+            else if (obj->getDirection() == "RIGHT")
+            {
+                obj->getPosition().setX(obj->getPosition().getX() + 1);
+            }
+            else
+            {
+                obj->getPosition().setX(obj->getPosition().getX() - 1);
+            }
+        }
     }
 }
 
