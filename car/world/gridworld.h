@@ -8,7 +8,7 @@
 class GridWorld {
 private:
     int size;
-    std::vector<std::vector<WorldObject*>> grid;
+    vector<vector<WorldObject*>> grid;
 
 public:
     GridWorld(int size);
