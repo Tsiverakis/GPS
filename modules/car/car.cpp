@@ -3,7 +3,7 @@
 extern int max_value;
 using namespace std;
 // constructor
-SelfDrivingCar::SelfDrivingCar(Position p, Position target, string type, string id,string glyph) : WorldObject(type,id,glyph,p.getX() , p.getY())
+SelfDrivingCar::SelfDrivingCar(Position p, Position target, string type, string id, string glyph) : WorldObject(type, id, glyph, p.getX(), p.getY())
 {
     this->target = target;
     Direction = "UP";
@@ -44,9 +44,9 @@ Position SelfDrivingCar::getPosition() const
 
 void SelfDrivingCar::makeDecision(vector<ReadData> data)
 {
-    int count_up = 0, count_down = 0, count_left = 0, count_right = 0;
-    bool up = false, down = false, left = false, right = false, change_direction = false, traffic_light_detected = false, bike_detected = false, decelerate = false, accelerate = false, decelerate1 = false;
+    bool up = false, down = false, left = false, right = false, traffic_light_detected = false, decelerate = false, decelerate1 = false;
     string decision;
+    vector<ReadData> objs_next_to_car;
 
     // calculates where the car needs to head to
     if (p.getX() < target.getX())
@@ -75,6 +75,7 @@ void SelfDrivingCar::makeDecision(vector<ReadData> data)
 
     for (ReadData obj : data)
     {
+        //it gets the id of the car
         string id;
         size_t index = obj.objectid.find(':');
         if (index != string::npos)
@@ -137,6 +138,10 @@ void SelfDrivingCar::makeDecision(vector<ReadData> data)
                 }
             }
         }
+        if (abs(obj.p.getX() - p.getX()) + abs(obj.p.getY() - p.getY()) <= 2)
+        {
+            objs_next_to_car.push_back(obj);
+        }
     }
 
     if (decelerate1 && speed > 1)
@@ -147,6 +152,32 @@ void SelfDrivingCar::makeDecision(vector<ReadData> data)
     if (decelerate && speed > 0)
     {
         speed--; // decelarate and stop
+    }
+
+    for (auto &obj : objs_next_to_car) // if there is an object next to the car towards the direction it goes it changes direction
+    {
+        if (p.getX() != obj.p.getX())
+        {
+            if (p.getX() < obj.p.getX())
+            {
+                right = false;
+            }
+            else
+            {
+                left = false;
+            }
+        }
+        else
+        {
+            if (p.getY() < obj.p.getY())
+            {
+                up = false;
+            }
+            else
+            {
+                down = false;
+            }
+        }
     }
 
     if (up)
@@ -165,6 +196,9 @@ void SelfDrivingCar::makeDecision(vector<ReadData> data)
     {
         Direction = "LEFT";
     }
+
+    
+
 
     if (!decelerate1 && !decelerate && speed < 2 && !traffic_light_detected)
     {
@@ -190,5 +224,4 @@ void SelfDrivingCar::executeMovement()
     {
         p.setX(p.getX() - speed);
     }
-
 }

@@ -58,7 +58,7 @@ std::vector<std::vector<WorldObject *>> &GridWorld::getGrid()
 
 void GridWorld::update(int *count)
 {
-    std::vector<WorldObject *> objectsToMove;
+    std::vector<MovingVehicle *> objectsToMove;
     std::vector<WorldObject *> lights;
 
     for (int x = 0; x < size; x++)
@@ -69,7 +69,7 @@ void GridWorld::update(int *count)
             {
                 if (grid[x][y]->getType() == "MovingObject" || grid[x][y]->getType() == "SelfDrivingCar")
                 {
-                    objectsToMove.push_back(grid[x][y]);
+                    objectsToMove.emplace_back(dynamic_cast<MovingVehicle *>(grid[x][y]));
                 }
                 else if (grid[x][y]->getType() == "StaticObject")
                 {
@@ -109,40 +109,38 @@ void GridWorld::update(int *count)
             *count = 0;
         }
 
-        for (auto *obj : objectsToMove)
-        {
-            Position oldPos = obj->getPosition();
+        // Position oldPos = obj->getPosition();
 
-            if (obj->getType() == "MovingObject")
-            {
-                MovingVehicle *mv = dynamic_cast<MovingVehicle *>(obj);
-                if (mv)
-                {
-                    grid[oldPos.getX()][oldPos.getY()] = nullptr;
-                    mv->move();
-                    Position newPos = mv->getPosition();
-                    if (newPos.getX() >= 0 && newPos.getX() < size && newPos.getY() >= 0 && newPos.getY() < size)
-                    {
-                        grid[newPos.getX()][newPos.getY()] = mv;
-                    }
-                    else
-                    {
-                        delete mv;
-                    }
-                }
-            }
-            else if (obj->getType() == "SelfDrivingCar")
-            {
-                grid[oldPos.getX()][oldPos.getY()] = nullptr;
-                Position newPos = obj->getPosition();
-                if (newPos.getX() >= 0 && newPos.getX() < size && newPos.getY() >= 0 && newPos.getY() < size)
-                {
-                    grid[newPos.getX()][newPos.getY()] = obj;
-                }
-            }
-        }
+        // if (obj->getType() == "MovingObject")
+        // {
+        //     MovingVehicle *mv = dynamic_cast<MovingVehicle *>(obj);
+        //     if (mv)
+        //     {
+        //         grid[oldPos.getX()][oldPos.getY()] = nullptr;
+        //         mv->move();
+        //         Position newPos = mv->getPosition();
+        //         if (newPos.getX() >= 0 && newPos.getX() < size && newPos.getY() >= 0 && newPos.getY() < size)
+        //         {
+        //             grid[newPos.getX()][newPos.getY()] = mv;
+        //         }
+        //         else
+        //         {
+        //             delete mv;
+        //         }
+        //     }
+        // }
+        // else if (obj->getType() == "SelfDrivingCar")
+        // {
+        //     grid[oldPos.getX()][oldPos.getY()] = nullptr;
+        //     Position newPos = obj->getPosition();
+        //     if (newPos.getX() >= 0 && newPos.getX() < size && newPos.getY() >= 0 && newPos.getY() < size)
+        //     {
+        //         grid[newPos.getX()][newPos.getY()] = obj;
+        //     }
+        // }
     }
 }
+
 
 void GridWorld::visualization_full() const
 {
@@ -161,7 +159,7 @@ void GridWorld::visualization_full() const
     std::cout << "--------------------------------" << std::endl;
 }
 
-void GridWorld::visualization_pov(SelfDrivingCar * ego, int radius, std::string mode) const
+void GridWorld::visualization_pov(SelfDrivingCar *ego, int radius, std::string mode) const
 {
     Position pos = ego->getPosition();
     std::string dir = ego->getDirection();
