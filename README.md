@@ -73,6 +73,10 @@ The provided `Makefile` automates the compilation process:
 | Τσιβεράκης Αντώνιος          | 1115202400299   |
 | Μουσουρης Χαραλαμπος-Ραφαη΄λ | 1115202400130   |
 
+### Υστερόγραφο
+
+Επειδή τα moving objects δεν κουνιούντε μπορεί σε μερικά run το self driving car να κολήσει, λόγο της λογικής που υλοποιήτε στην συνάρτηση makeDecision του self driving car, όπου το αναγκάζει να παραμένει σταθερό μέχρι να βγεί εκτός εμβέλειας το moving object.
+
 ## Specifications
 
 [![View PDF](https://img.shields.io/badge/View-PDF-red?style=for-the-badge&logo=adobe-acrobat-reader)](./docs/Specifications.pdf)
