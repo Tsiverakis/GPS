@@ -61,6 +61,17 @@ The provided `Makefile` automates the compilation process:
    ```bash
    make
    ```
+2. **Example run format**:
+   ```bash
+   ./self_driving_sim --dimX 25 --dimY 25 --numMovingCars 8 --numTrafficLights 4 --numParkedCars 6 --numStopSigns 3 --gps 20 20
+   ```
+
+## Developers
+
+| Ονοματεπώνυμο                | Αριθμός μητρώου |
+| :--------------------------- | :-------------- |
+| Τσιβεράκης Αντώνιος          | 1115202400299   |
+| Μουσουρης Χαραλαμπος-Ραφαη΄λ | 1115202400130   |
 
 ## Specifications
 
