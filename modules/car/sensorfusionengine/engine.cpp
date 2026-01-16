@@ -1,6 +1,6 @@
 #include "engine.h"
 
-double minConfidenceThreshold = 0.5;
+extern double minConfidenceThreshold;
 using namespace std;
 
 // constructor

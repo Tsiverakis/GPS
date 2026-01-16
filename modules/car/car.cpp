@@ -1,21 +1,17 @@
 #include "car.h"
 
+extern int max_value;
 using namespace std;
-
 // constructor
-SelfDrivingCar::SelfDrivingCar(Position p, Position target)
-    : WorldObject("SelfDrivingCar", "EGO", "@", p.getX(), p.getY()) // Κλήση του constructor της βάσης
+SelfDrivingCar::SelfDrivingCar(Position p, Position target, string type, string id,string glyph) : WorldObject(type,id,glyph,p.getX() , p.getY())
 {
-    this->p = p;
     this->target = target;
-    this->Direction = "UP";
-    this->speed = 0;
-    this->lidar = Lidar();
-    this->radar = Radar();
-    this->camera = Camera();
-    this->engine = SensorFusionEngine();
-
-    cout << "[+CAR: EGO] Initialized at (" << p.getX() << "," << p.getY() << ") facing UP" << endl;
+    Direction = "UP";
+    speed = 0;
+    lidar = Lidar();
+    radar = Radar();
+    camera = Camera();
+    engine = SensorFusionEngine();
 }
 
 // destructor
@@ -46,96 +42,153 @@ Position SelfDrivingCar::getPosition() const
     return p;
 }
 
-Position SelfDrivingCar::getTarget() const
-{
-    return target;
-}
-
 void SelfDrivingCar::makeDecision(vector<ReadData> data)
 {
-    bool up = false, down = false, left = false, right = false;
-    bool traffic_light_detected = false;
-    bool obstacle_detected = false;
+    int count_up = 0, count_down = 0, count_left = 0, count_right = 0;
+    bool up = false, down = false, left = false, right = false, change_direction = false, traffic_light_detected = false, bike_detected = false, decelerate = false, accelerate = false, decelerate1 = false;
+    string decision;
 
-    int distToTarget = abs(p.getX() - target.getX()) + abs(p.getY() - target.getY());
-
-    if (p.getX() < target.getX()) right = true;
-    else if (p.getX() > target.getX()) left = true;
-
-    if (p.getY() < target.getY()) up = true;
-    else if (p.getY() > target.getY()) down = true;
-
-    for (const auto& obj : data)
+    // calculates where the car needs to head to
+    if (p.getX() < target.getX())
     {
-        if (obj.distance <= 2)
+        right = true;
+    }
+    else if (p.getX() > target.getX())
+    {
+        left = true;
+    }
+
+    if (p.getY() > target.getY())
+    {
+        down = true;
+    }
+    else if (p.getY() < target.getY())
+    {
+        up = true;
+    }
+
+    // we are arriving
+    if (abs(p.getX() - target.getX()) + abs(p.getY() - target.getY()) <= 5 && (p.getX() != target.getX() || p.getY() != target.getY()))
+    {
+        decelerate1 = true;
+    }
+
+    for (ReadData obj : data)
+    {
+        string id;
+        size_t index = obj.objectid.find(':');
+        if (index != string::npos)
         {
-            if (obj.type == "StaticObject")
-            {
+            id = obj.objectid.substr(0, index);
+        }
+        if (obj.distance <= 3)
+        { // checks for nearby objects
+            if (obj.type == "StaticObject" && obj.trafficlightp != "N/A")
+            { // check for red and yellow traffic lights
                 if (obj.trafficlightp == "RED" || obj.trafficlightp == "YELLOW")
                 {
                     traffic_light_detected = true;
+                    decelerate = true;
                 }
-                
-                if (up && obj.p.getY() > p.getY() && obj.p.getX() == p.getX()) { up = false; obstacle_detected = true; }
-                if (down && obj.p.getY() < p.getY() && obj.p.getX() == p.getX()) { down = false; obstacle_detected = true; }
-                if (right && obj.p.getX() > p.getX() && obj.p.getY() == p.getY()) { right = false; obstacle_detected = true; }
-                if (left && obj.p.getX() < p.getX() && obj.p.getY() == p.getY()) { left = false; obstacle_detected = true; }
             }
-            else if (obj.type == "MovingObject")
+        }
+
+        if (obj.distance <= 2)
+        {
+            if (obj.type == "StaticObject" && id == "StationaryVehicle") // if it moves towards a StationaryVehicle it changes direction
+            {                                                            // check for colliding with a static car
+                if (down == true && obj.p.getY() < p.getY() && p.getX() == obj.p.getX())
+                {
+                    down = false;
+                }
+
+                if (up == true && obj.p.getY() > p.getY() && p.getX() == obj.p.getX())
+                {
+                    up = false;
+                }
+
+                if (right == true && obj.p.getX() > p.getX() && p.getY() == obj.p.getY())
+                {
+                    right = false;
+                }
+
+                if (left == true && obj.p.getX() < p.getX() && p.getY() == obj.p.getY())
+                {
+                    left = false;
+                }
+            }
+            else if (obj.type == "MovingObject") // if it moves towards a moving object it decelerates
             {
-                if (up && obj.p.getY() > p.getY() && obj.p.getX() == p.getX()) obstacle_detected = true;
-                if (down && obj.p.getY() < p.getY() && obj.p.getX() == p.getX()) obstacle_detected = true;
-                if (right && obj.p.getX() > p.getX() && obj.p.getY() == p.getY()) obstacle_detected = true;
-                if (left && obj.p.getX() < p.getX() && obj.p.getY() == p.getY()) obstacle_detected = true;
+                if (down == true && obj.p.getY() < p.getY() && p.getX() == obj.p.getX())
+                {
+                    decelerate = true;
+                }
+                else if (up == true && obj.p.getY() > p.getY() && p.getX() == obj.p.getX())
+                {
+                    decelerate = true;
+                }
+                else if (right == true && obj.p.getX() > p.getX() && p.getY() == obj.p.getY())
+                {
+                    decelerate = true;
+                }
+                else if (left == true && obj.p.getX() < p.getX() && p.getY() == obj.p.getY())
+                {
+                    decelerate = true;
+                }
             }
         }
     }
 
-    if (distToTarget == 0)
+    if (decelerate1 && speed > 1)
     {
-        speed = 0;
+        speed--; // decelerate but not stop
     }
-    else if (traffic_light_detected || obstacle_detected)
+
+    if (decelerate && speed > 0)
     {
-        speed = 0;
+        speed--; // decelarate and stop
+    }
+
+    if (up)
+    {
+        Direction = "UP";
+    }
+    else if (down)
+    {
+        Direction = "DOWN";
+    }
+    else if (right)
+    {
+        Direction = "RIGHT";
+    }
+    else if (left)
+    {
+        Direction = "LEFT";
+    }
+
+    if (!decelerate1 && !decelerate && speed < 2 && !traffic_light_detected)
+    {
+        speed++; // accelerate
+    }
+}
+
+void SelfDrivingCar::executeMovement()
+{
+    if (Direction == "UP")
+    {
+        p.setY(p.getY() + speed);
+    }
+    else if (Direction == "DOWN")
+    {
+        p.setY(p.getY() - speed);
+    }
+    else if (Direction == "RIGHT")
+    {
+        p.setX(p.getX() + speed);
     }
     else
     {
-        if (distToTarget < 2) speed = distToTarget;
-        else speed = 2;
+        p.setX(p.getX() - speed);
     }
 
-    if (up) Direction = "UP";
-    else if (down) Direction = "DOWN";
-    else if (right) Direction = "RIGHT";
-    else if (left) Direction = "LEFT";
-}
-
-bool SelfDrivingCar::executeMovement()
-{
-    if (speed <= 0) 
-    {
-        if (p.getX() == target.getX() && p.getY() == target.getY()) return true;
-        return false;
-    }
-
-    if (Direction == "UP") p.setY(p.getY() + speed);
-    else if (Direction == "DOWN") p.setY(p.getY() - speed);
-    else if (Direction == "RIGHT") p.setX(p.getX() + speed);
-    else if (Direction == "LEFT") p.setX(p.getX() - speed);
-
-    if (p.getX() < 0) p.setX(0);
-    if (p.getY() < 0) p.setY(0);
-    if (p.getX() >= max_value) p.setX(max_value - 1);
-    if (p.getY() >= max_value) p.setY(max_value - 1);
-
-    cout << "DEBUG: Car is at (" << p.getX() << "," << p.getY() << ") with speed " << speed << " heading " << Direction << endl;
-
-    if (p.getX() == target.getX() && p.getY() == target.getY())
-    {
-        cout << "[GOAL] Target reached!" << endl;
-        return true;
-    }
-
-    return false;
 }

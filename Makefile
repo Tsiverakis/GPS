@@ -3,13 +3,13 @@ CXX = g++
 CXXFLAGS = -std=c++11 -Wall -I.
 
 SRCS = main.cpp \
-       temp.cpp \
-       car/car.cpp \
-       sensorfusionengine/engine.cpp \
-       sensors/sensors.cpp \
-       world/gridworld.cpp \
-       objects/StaticObjects.cpp \
-       objects/MovingObjects.cpp
+       modules/temp.cpp \
+       modules/car/car.cpp \
+       modules/car/sensorfusionengine/engine.cpp \
+       modules/car/sensors/sensors.cpp \
+       modules/world/gridworld.cpp \
+       modules/objects/StaticObjects.cpp \
+       modules/objects/MovingObjects.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

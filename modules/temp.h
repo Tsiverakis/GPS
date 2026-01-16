@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-extern int max_value;
-
 // holds a 2d possition x,y
 class Position
 {

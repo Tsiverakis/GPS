@@ -24,7 +24,7 @@ public:
     WorldObject* getObject(int x, int y) const;
     std::vector<std::vector<WorldObject*>>& getGrid();
 
-    void update();
+    void update(int *count);
     void render() const;
 
     void visualization_full() const;

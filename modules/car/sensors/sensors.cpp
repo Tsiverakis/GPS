@@ -1,12 +1,13 @@
 #include <iostream>
 #include <vector>
-#include "temp.h"
+#include "../../temp.h"
 #include "sensors.h"
 #include <cmath>
-#include "objects/MovingObjects.h"
-#include "objects/StaticObjects.h"
-
+#include "../../objects/MovingObjects.h"
+#include "../../objects/StaticObjects.h"
+extern int max_value;
 using namespace std;
+
 
 // SENSOR
 Sensor::Sensor(int range)

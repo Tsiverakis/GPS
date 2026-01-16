@@ -1,36 +1,52 @@
-#ifndef STATIC_OBJECTS_H
-#define STATIC_OBJECTS_H
-
+#include <iostream>
 #include "../temp.h"
 #include <string>
 
-// Stationary Vehicle
-class StationaryVehicle : public WorldObject {
+
+
+// It is a stationary vehicle at Position x,y
+class StationaryVehicle : public WorldObject
+{
 public:
+    // constructor
     StationaryVehicle(int x, int y, std::string ID, std::string glyph);
+
+    // destructor
     ~StationaryVehicle();
 };
 
-// Traffic Sign
-class TrafficSign : public WorldObject {
+// It is a traffic sign with an ID and a Position x,y
+class TrafficSign : public WorldObject
+{
 private:
-    std::string signtext;
+    std::string signtext; // type of sign
 public:
-    TrafficSign(int x, int y, std::string text, std::string ID, std::string glyph);
+    // constructor
+    TrafficSign(int x, int y, std::string signID, std::string ID, std::string glyph);
+
+
+    // destructor
     ~TrafficSign();
-    std::string get_text() const;
+
+    std::string get_text(); // returns the type of the sign
 };
 
-// Traffic Light
-class TrafficLight : public WorldObject {
+// It is a traffic light with a color(state) and a Position x,y
+class TrafficLight : public WorldObject
+{
 private:
-    std::string state; // "RED", "GREEN", "YELLOW"
-    int timer;
-public:
-    TrafficLight(int x, int y, std::string initialState, std::string ID, std::string glyph);
-    ~TrafficLight();
-    std::string get_State() const;
-    void update(int currentTick); 
-};
+    std::string state; // holds the color of the traffic light
 
-#endif
+public:
+    // constructor
+    TrafficLight(int x, int y, std::string state, std::string ID, std::string glyph);
+
+
+    // destructor
+    ~TrafficLight();
+
+
+    std::string get_State(); // returns the color of the traffic light
+
+    void set_State(std::string color);
+};
